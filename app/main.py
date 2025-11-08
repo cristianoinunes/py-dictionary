@@ -44,7 +44,7 @@ class Dictionary:
         index: int = h % self._capacity
         bucket: List[Tuple[Any, int, Any]] = self._buckets[index]
 
-        for i, (k, khash, v) in enumerate(bucket):
+        for i, (k, khash, _) in enumerate(bucket):
             if khash == h and k == key:
                 del bucket[i]
                 self._size -= 1
@@ -52,16 +52,15 @@ class Dictionary:
         raise KeyError(key)
 
     def _resize(self) -> None:
-        old_buckets: List[List[Tuple[Any, int, Any]]] = self._buckets
-        self._capacity *= 2
-        self._buckets = [[] for _ in range(self._capacity)]
-        old_size: int = self._size
-        self._size = 0
+        new_capacity: int = self._capacity * 2
+        new_buckets: List[List[Tuple[Any, int, Any]]] = [
+            [] for _ in range(new_capacity)
+        ]
 
-        for bucket in old_buckets:
+        for bucket in self._buckets:
             for k, h, v in bucket:
-                index: int = h % self._capacity
-                self._buckets[index].append((k, h, v))
-                self._size += 1
+                new_index: int = h % new_capacity
+                new_buckets[new_index].append((k, h, v))
 
-        assert self._size == old_size
+        self._buckets = new_buckets
+        self._capacity = new_capacity
